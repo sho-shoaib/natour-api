@@ -11,11 +11,18 @@ const getAllTours = async (req, res) => {
     const excludedFeilds = ["page", "sort", "limit", "fields"];
     excludedFeilds.forEach((el) => delete queryObj[el]);
 
+    // gte, lte, lt, gt => $gte,... filtering
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    console.log(JSON.parse(queryStr));
+
     // get all data from model
     // const tours = await Tour.find();
 
     // query passing - 1
-    const toursQuery = Tour.find(queryObj);
+    const toursQuery = Tour.find(JSON.parse(queryStr));
+    // { difficulty: "easy", duration: { gte: 5 } } --- queryObj
+    // { difficulty: "easy", duration: { $gte: 5 } } --- queryObj needed by mongoose
 
     // query passing - 2
     // await Tour.find().where("duration").equals(5).where("price").equals(500)
