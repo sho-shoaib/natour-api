@@ -1,16 +1,19 @@
-import express from "express";
-import {
-  getAllTours,
-  addTour,
-  getOneTour,
-  updateTour,
-  deleteTour,
-} from "./../controllers/tourController.js";
+const express = require('express');
+const tourController = require('./../controllers/tourController');
 
-export const router = express.Router();
-// run this middleware only if there is an param of id
-// router.param("id", checkId);
+const router = express.Router();
 
-// ROUTES
-router.route("/").get(getAllTours).post(addTour);
-router.route("/:id").get(getOneTour).patch(updateTour).delete(deleteTour);
+router.param('id', tourController.checkID);
+
+router
+  .route('/')
+  .get(tourController.getAllTours)
+  .post(tourController.checkBody, tourController.createTour);
+
+router
+  .route('/:id')
+  .get(tourController.getTour)
+  .patch(tourController.updateTour)
+  .delete(tourController.deleteTour);
+
+module.exports = router;
