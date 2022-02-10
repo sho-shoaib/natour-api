@@ -5,11 +5,14 @@ import {
   getTour,
   updateTour,
   deleteTour,
+  aliasTopTours,
 } from "./../controllers/tourController.js";
 
 export const router = express.Router();
 
 //router.param("id", checkID);
+
+router.route("/top-5-tours").get(aliasTopTours, getAllTours);
 
 router
   .route("/")

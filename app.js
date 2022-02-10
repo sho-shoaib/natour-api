@@ -1,5 +1,7 @@
 import express from "express";
 import morgan from "morgan";
+import dotenv from "dotenv";
+dotenv.config({ path: "./config.env" });
 
 import { router as tourRouter } from "./routes/tourRoutes.js";
 import { router as userRouter } from "./routes/userRoutes.js";
@@ -7,9 +9,7 @@ import { router as userRouter } from "./routes/userRoutes.js";
 export const app = express();
 
 // 1) MIDDLEWARES
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
-}
+app.use(morgan("dev"));
 
 app.use(express.json());
 

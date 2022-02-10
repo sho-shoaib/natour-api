@@ -1,8 +1,55 @@
 import Tour from "../models/tourModel.js";
 
+const aliasTopTours = (req, res, next) => {
+  req.query.limit = "5";
+  req.query.sort = "-ratingAverage,price";
+  req.query.fields = "ratingAverage,name,price,summary,difficulty";
+  next();
+};
+
 const getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    var queryObj = { ...req.query };
+    const excludedFeilds = ["page", "sort", "limit", "fields"];
+    excludedFeilds.forEach((item) => delete queryObj[item]);
+
+    // gte => $gte conversion
+    var queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lt|lte)\b/g, (match) => `$${match}`);
+    queryObj = JSON.parse(queryStr);
+
+    var toursQuery = Tour.find(queryObj);
+
+    // sorting
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(",").join(" ");
+      toursQuery = toursQuery.sort(sortBy);
+    } else {
+      toursQuery = toursQuery.sort("-createdAt");
+    }
+
+    // feild limitimg
+    if (req.query.fields) {
+      const fields = req.query.fields.split(",").join(" ");
+      toursQuery = toursQuery.select(fields);
+    } else {
+      toursQuery = toursQuery.select("-__v");
+    }
+
+    // pagination
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 3;
+    const skip = (page - 1) * limit;
+    toursQuery = toursQuery.skip(skip).limit(limit);
+    if (req.query.page) {
+      const tourCount = await Tour.countDocument();
+      if (tourCount <= skip) {
+        throw new Error("This page does not exist");
+      }
+    }
+
+    // awaiting toursQuery
+    const tours = await toursQuery;
 
     res.status(200).json({
       status: "success",
@@ -96,4 +143,11 @@ const deleteTour = async (req, res) => {
   }
 };
 
-export { deleteTour, updateTour, createTour, getTour, getAllTours };
+export {
+  deleteTour,
+  updateTour,
+  createTour,
+  getTour,
+  getAllTours,
+  aliasTopTours,
+};
