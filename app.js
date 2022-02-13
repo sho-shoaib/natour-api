@@ -1,5 +1,7 @@
 import express from "express";
 import morgan from "morgan";
+import AppError from "./utils/appError.js";
+import { handleGlobalError } from "./controllers/errorController.js";
 
 import { router as tourRouter } from "./routes/tourRoutes.js";
 import { router as userRouter } from "./routes/userRoutes.js";
@@ -26,24 +28,7 @@ app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
 
 app.all("*", (req, res, next) => {
-  // res.status(404).json({
-  //   status: "failed",
-  //   message: "route does not exist",
-  // });
-
-  const err = new Error("route does not exist");
-  err.status = "fail";
-  err.statusCode = 404;
-
-  next(err);
+  next(new AppError(`Cant find ${req.originalUrl}`));
 });
 
-app.use((err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || "error";
-
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-  });
-});
+app.use(handleGlobalError);
