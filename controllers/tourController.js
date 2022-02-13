@@ -24,8 +24,6 @@ const getAllTours = async (req, res) => {
     if (req.query.sort) {
       const sortBy = req.query.sort.split(",").join(" ");
       toursQuery = toursQuery.sort(sortBy);
-    } else {
-      toursQuery = toursQuery.sort("-createdAt");
     }
 
     // feild limitimg
@@ -42,7 +40,7 @@ const getAllTours = async (req, res) => {
     const skip = (page - 1) * limit;
     toursQuery = toursQuery.skip(skip).limit(limit);
     if (req.query.page) {
-      const tourCount = await Tour.countDocument();
+      const tourCount = await Tour.countDocument;
       if (tourCount <= skip) {
         throw new Error("This page does not exist");
       }
